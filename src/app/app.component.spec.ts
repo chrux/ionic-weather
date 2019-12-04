@@ -7,23 +7,23 @@ import { StatusBar } from '@ionic-native/status-bar/ngx';
 
 import { AppComponent } from './app.component';
 
+import { createPlatformMock } from '../../test/mocks';
+
 describe('AppComponent', () => {
 
-  let statusBarSpy, splashScreenSpy, platformReadySpy, platformSpy;
+  let statusBar, splashScreen;
 
   beforeEach(async(() => {
-    statusBarSpy = jasmine.createSpyObj('StatusBar', ['styleDefault']);
-    splashScreenSpy = jasmine.createSpyObj('SplashScreen', ['hide']);
-    platformReadySpy = Promise.resolve();
-    platformSpy = jasmine.createSpyObj('Platform', { ready: platformReadySpy });
+    statusBar = jasmine.createSpyObj('StatusBar', ['styleDefault']);
+    splashScreen = jasmine.createSpyObj('SplashScreen', ['hide']);
 
     TestBed.configureTestingModule({
       declarations: [AppComponent],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [
-        { provide: StatusBar, useValue: statusBarSpy },
-        { provide: SplashScreen, useValue: splashScreenSpy },
-        { provide: Platform, useValue: platformSpy },
+        { provide: StatusBar, useValue: statusBar },
+        { provide: SplashScreen, useValue: splashScreen },
+        { provide: Platform, useFactory: createPlatformMock }
       ],
     }).compileComponents();
   }));
@@ -34,11 +34,31 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should initialize the app', async () => {
-    TestBed.createComponent(AppComponent);
-    expect(platformSpy.ready).toHaveBeenCalled();
-    await platformReadySpy;
-    expect(statusBarSpy.styleDefault).toHaveBeenCalled();
-    expect(splashScreenSpy.hide).toHaveBeenCalled();
+  // it('should initialize the app', async () => {
+    // TestBed.createComponent(AppComponent);
+    // expect(statusBar.styleDefault).toHaveBeenCalled();
+    // expect(splashScreen.hide).toHaveBeenCalled();
+  // });
+
+  describe('initialization', () => {
+    let platform;
+    beforeEach(() => {
+      platform = TestBed.get(Platform);
+      TestBed.createComponent(AppComponent);
+    });
+
+    it('waits for the platform to be ready', () => {
+      expect(platform.ready).toHaveBeenCalledTimes(1);
+    });
+
+    it('sets the default status bar style when ready', async () => {
+      await platform.ready();
+      expect(statusBar.styleDefault).toHaveBeenCalledTimes(1);
+    });
+
+    it('hides the splash screen when ready', async () => {
+      await platform.ready();
+      expect(splashScreen.hide).toHaveBeenCalledTimes(1);
+    });
   });
 });
