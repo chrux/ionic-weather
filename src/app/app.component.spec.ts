@@ -14,7 +14,7 @@ describe('AppComponent', () => {
   let statusBar, splashScreen;
 
   beforeEach(async(() => {
-    statusBar = jasmine.createSpyObj('StatusBar', ['styleDefault']);
+    statusBar = jasmine.createSpyObj('StatusBar', ['styleLightContent', 'backgroundColorByHexString']);
     splashScreen = jasmine.createSpyObj('SplashScreen', ['hide']);
 
     TestBed.configureTestingModule({
@@ -51,9 +51,24 @@ describe('AppComponent', () => {
       expect(platform.ready).toHaveBeenCalledTimes(1);
     });
 
-    it('sets the default status bar style when ready', async () => {
+    it('sets the light content status bar style when ready', async () => {
+      expect(statusBar.styleLightContent).not.toHaveBeenCalled();
       await platform.ready();
-      expect(statusBar.styleDefault).toHaveBeenCalledTimes(1);
+      expect(statusBar.styleLightContent).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not set the background color by default', async () => {
+      expect(statusBar.backgroundColorByHexString).not.toHaveBeenCalled();
+      await platform.ready();
+      expect(statusBar.backgroundColorByHexString).not.toHaveBeenCalled();
+    });
+
+    it('sets the background color if the current platform is android', async () => {
+      platform.is.withArgs('android').and.returnValue(true);
+      expect(statusBar.backgroundColorByHexString).not.toHaveBeenCalled();
+      await platform.ready();
+      expect(statusBar.backgroundColorByHexString).toHaveBeenCalledTimes(1);
+      expect(statusBar.backgroundColorByHexString).toHaveBeenCalledWith('#074f8b');
     });
 
     it('hides the splash screen when ready', async () => {
