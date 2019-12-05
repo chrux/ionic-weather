@@ -4,30 +4,19 @@ import { IconMapService } from '../services/icon-map/icon-map.service';
 import { Weather } from '../models/weather';
 import { WeatherService } from '../services/weather/weather.service';
 import { LoadingController } from '@ionic/angular';
+import { WeatherPageBase } from '../weather-page-base/weather-page-base';
 
 @Component({
   selector: 'app-current-weather',
   templateUrl: 'current-weather.page.html',
   styleUrls: ['current-weather.page.scss']
 })
-export class CurrentWeatherPage {
-  currentWeather: Weather;
-
+export class CurrentWeatherPage extends WeatherPageBase<Weather> {
   constructor(
-    public iconMap: IconMapService,
-    private weather: WeatherService,
-    private loadingController: LoadingController
-  ) { }
-
-  async ionViewDidEnter() {
-    const l = await this.loadingController.create({
-      message: 'Please wait...',
-      translucent: true
-    });
-    l.present();
-    this.weather.current().subscribe(w => {
-      this.currentWeather = w;
-      l.dismiss();
-    });
+    iconMap: IconMapService,
+    loadingController: LoadingController,
+    weather: WeatherService
+  ) {
+    super(iconMap, loadingController, weather.current);
   }
 }
