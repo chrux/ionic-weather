@@ -13,10 +13,10 @@ import { WeatherPageBase } from '../weather-page-base/weather-page-base';
 })
 export class CurrentWeatherPage extends WeatherPageBase<Weather> {
   constructor(
-    iconMap: IconMapService,
+    public iconMap: IconMapService,
     loadingController: LoadingController,
     weather: WeatherService
   ) {
-    super(iconMap, loadingController, () => weather.current());
+    super(loadingController, () => weather.current());
   }
 }

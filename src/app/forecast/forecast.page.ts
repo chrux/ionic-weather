@@ -13,9 +13,9 @@ import { WeatherPageBase } from '../weather-page-base/weather-page-base';
 })
 export class ForecastPage extends WeatherPageBase<Forecast> {
   constructor(
-    iconMap: IconMapService,
+    public iconMap: IconMapService,
     loadingController: LoadingController,
     weather: WeatherService) {
-      super(iconMap, loadingController, () => weather.forecast());
+      super(loadingController, () => weather.forecast());
     }
 }

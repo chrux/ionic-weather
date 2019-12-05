@@ -6,7 +6,6 @@ export class WeatherPageBase<T> {
   data: T;
 
   constructor(
-    public iconMap: IconMapService,
     private loadingController: LoadingController,
     private fetch: () => Observable<T>
   ) { }
