@@ -1,5 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, LoadingController } from '@ionic/angular';
 
 import { ForecastPage } from './forecast.page';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
@@ -8,17 +8,25 @@ import { createWeatherServiceMock } from '../services/weather/weather.service.mo
 
 import { of } from 'rxjs';
 import { By } from '@angular/platform-browser';
+import { createOverlayElementMock, createOverlayControllerMock } from 'test/mocks';
 
 describe('ForecastPage', () => {
   let component: ForecastPage;
   let fixture: ComponentFixture<ForecastPage>;
+  let loading;
 
   beforeEach(async(() => {
+    loading = createOverlayElementMock('Loading');
     TestBed.configureTestingModule({
       declarations: [ForecastPage],
       imports: [IonicModule.forRoot()],
       providers: [
-        { provide: WeatherService, useFactory: createWeatherServiceMock }
+        { provide: WeatherService, useFactory: createWeatherServiceMock },
+        {
+          provide: LoadingController,
+          useFactory: () =>
+            createOverlayControllerMock('LoadingController', loading)
+        }
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
     }).compileComponents();
@@ -33,13 +41,20 @@ describe('ForecastPage', () => {
   });
 
   describe('entering the page', () => {
-    it('gets the forecast', () => {
+    it('displays a loading indicator', async () => {
+      const loadingController = TestBed.get(LoadingController);
+      await component.ionViewDidEnter();
+      expect(loadingController.create).toHaveBeenCalledTimes(1);
+      expect(loading.present).toHaveBeenCalledTimes(1);
+    });
+
+    it('gets the forecast', async () => {
       const weather = TestBed.get(WeatherService);
-      component.ionViewDidEnter();
+      await component.ionViewDidEnter();
       expect(weather.forecast).toHaveBeenCalledTimes(1);
     });
 
-    it('shows the forecast items', () => {
+    it('shows the forecast items', async () => {
       const weather = TestBed.get(WeatherService);
       weather.forecast.and.returnValue(
         of([
@@ -66,10 +81,41 @@ describe('ForecastPage', () => {
           ]
         ])
       );
-      component.ionViewDidEnter();
+      await component.ionViewDidEnter();
       fixture.detectChanges();
       const f = fixture.debugElement.queryAll(By.css('kws-daily-forecast'));
       expect(f.length).toEqual(3);
+    });
+
+    it('dismisses the loading indicator', async () => {
+      const weather = TestBed.get(WeatherService);
+      weather.forecast.and.returnValue(
+        of([
+          [
+            {
+              temperature: 300,
+              condition: 200,
+              date: new Date(2018, 8, 19)
+            }
+          ],
+          [
+            {
+              temperature: 265,
+              condition: 601,
+              date: new Date(2018, 8, 20)
+            }
+          ],
+          [
+            {
+              temperature: 293,
+              condition: 800,
+              date: new Date(2018, 8, 21)
+            }
+          ]
+        ])
+      );
+      await component.ionViewDidEnter();
+      expect(loading.dismiss).toHaveBeenCalledTimes(1);
     });
   });
 });
