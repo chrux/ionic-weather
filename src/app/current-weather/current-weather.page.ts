@@ -17,6 +17,6 @@ export class CurrentWeatherPage extends WeatherPageBase<Weather> {
     loadingController: LoadingController,
     weather: WeatherService
   ) {
-    super(iconMap, loadingController, weather.current);
+    super(iconMap, loadingController, () => weather.current());
   }
 }
