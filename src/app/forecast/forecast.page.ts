@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { Forecast } from '../models/forecast';
 import { IconMapService } from '../services/icon-map/icon-map.service';
@@ -10,7 +10,8 @@ import { UserPreferencesService } from '../services/user-preferences/user-prefer
 @Component({
   selector: 'app-forecast',
   templateUrl: 'forecast.page.html',
-  styleUrls: ['forecast.page.scss']
+  styleUrls: ['forecast.page.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ForecastPage extends WeatherPageBase<Forecast> {
   constructor(

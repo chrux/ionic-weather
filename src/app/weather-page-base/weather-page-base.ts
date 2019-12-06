@@ -1,29 +1,43 @@
 import { LoadingController } from '@ionic/angular';
-import { Observable } from 'rxjs';
-import { IconMapService } from '../services/icon-map/icon-map.service';
+import { Observable, Subject, from } from 'rxjs';
 import { UserPreferencesService } from '../services/user-preferences/user-preferences.service';
+import { flatMap, tap } from 'rxjs/operators';
 
 export class WeatherPageBase<T> {
-  data: T;
+  private refresh: Subject<void>;
+  data$: Observable<T>;
   scale: string;
 
   constructor(
     protected userPreferences: UserPreferencesService,
     private loadingController: LoadingController,
     private fetch: () => Observable<T>
-  ) { }
+  ) {
+    this.refresh = new Subject();
+    this.data$ = this.refresh.pipe(flatMap(() => this.getData()));
+  }
 
   async ionViewDidEnter() {
     this.scale = (await this.userPreferences.getUseCelcius() ? 'C' : 'F');
+    this.refresh.next();
+  }
+
+  private async showLoading(): Promise<HTMLIonLoadingElement> {
     const l = await this.loadingController.create({
-      message: 'Please wait...',
-      translucent: true
+      message: 'Please wait...'
     });
-    l.present();
-    this.fetch().subscribe(d => {
-      this.data = d;
-      l.dismiss();
-    });
+    await l.present();
+    return l;
+  }
+
+  private getData(): Observable<T> {
+    let loading: HTMLIonLoadingElement;
+    return from(this.showLoading()).pipe(flatMap(l => {
+        loading = l;
+        return this.fetch();
+      }),
+      tap(() => loading.dismiss())
+    );
   }
 
   toggleScale() {

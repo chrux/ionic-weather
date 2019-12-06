@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { IonicModule, LoadingController } from '@ionic/angular';
 
 import { UvIndexPage } from './uv-index.page';
@@ -54,38 +54,41 @@ describe('UvIndexPage', () => {
       );
     });
 
-    it('displays a loading indicator', async () => {
+    it('displays a loading indicator', fakeAsync(() => {
       const loadingController = TestBed.get(LoadingController);
-      await component.ionViewDidEnter();
+      component.ionViewDidEnter();
+      tick();
       expect(loadingController.create).toHaveBeenCalledTimes(1);
       expect(loading.present).toHaveBeenCalledTimes(1);
-    });
+    }));
 
-    it('gets the UV index', async () => {
+    it('gets the UV index', fakeAsync(() => {
       const weather = TestBed.get(WeatherService);
-      await component.ionViewDidEnter();
+      component.ionViewDidEnter();
+      tick();
       expect(weather.uvIndex).toHaveBeenCalledTimes(1);
-    });
+    }));
 
-    it('displays the UV index', async () => {
-      await component.ionViewDidEnter();
+    it('displays the UV index', fakeAsync(() => {
+      component.ionViewDidEnter();
+      tick();
       fixture.detectChanges();
-      await new Promise(resolve => setTimeout(() => resolve()));
       const el = fixture.debugElement.query(By.css('kws-uv-index'));
       expect(el).toBeTruthy();
-    });
+    }));
 
-    it('displays the appropriate description', async () => {
-      await component.ionViewDidEnter();
+    it('displays the appropriate description', fakeAsync(() => {
+      component.ionViewDidEnter();
+      tick();
       fixture.detectChanges();
       const el = fixture.debugElement.query(By.css('.description'));
       expect(el.nativeElement.textContent).toContain('Stay in the shade');
-    });
+    }));
 
-    it('dismisses the loading indicator', async () => {
-      const weather = TestBed.get(WeatherService);
-      await component.ionViewDidEnter();
+    it('dismisses the loading indicator', fakeAsync(() => {
+      component.ionViewDidEnter();
+      tick();
       expect(loading.dismiss).toHaveBeenCalledTimes(1);
-    });
+    }));
   });
 });

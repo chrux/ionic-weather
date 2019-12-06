@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { IonicModule, LoadingController } from '@ionic/angular';
 
 import { CurrentWeatherPage } from './current-weather.page';
@@ -44,20 +44,22 @@ describe('CurrentWeatherPage', () => {
   });
 
   describe('entering the page', () => {
-    it('displays a loading indicator', async () => {
+    it('displays a loading indicator', fakeAsync(() => {
       const loadingController = TestBed.get(LoadingController);
-      await component.ionViewDidEnter();
+      component.ionViewDidEnter();
+      tick();
       expect(loadingController.create).toHaveBeenCalledTimes(1);
       expect(loading.present).toHaveBeenCalledTimes(1);
-    });
+    }));
 
-    it('gets the current weather', async () => {
+    it('gets the current weather', fakeAsync(() => {
       const weather = TestBed.get(WeatherService);
-      await component.ionViewDidEnter();
+      component.ionViewDidEnter();
+      tick();
       expect(weather.current).toHaveBeenCalledTimes(1);
-    });
+    }));
 
-    it('displays the current weather', async () => {
+    it('displays the current weather', fakeAsync(() => {
       const weather = TestBed.get(WeatherService);
       weather.current.and.returnValue(
         of({
@@ -66,14 +68,14 @@ describe('CurrentWeatherPage', () => {
           date: new Date(1485789600 * 1000)
         })
       );
-      await component.ionViewDidEnter();
+      component.ionViewDidEnter();
+      tick();
       fixture.detectChanges();
-      await new Promise(resolve => setTimeout(() => resolve()));
       const t = fixture.debugElement.query(By.css('kws-temperature'));
       expect(t).toBeTruthy();
-    });
+    }));
 
-    it('dismisses the loading indicator', async () => {
+    it('dismisses the loading indicator', fakeAsync(() => {
       const weather = TestBed.get(WeatherService);
       weather.current.and.returnValue(
         of({
@@ -82,9 +84,10 @@ describe('CurrentWeatherPage', () => {
           date: new Date(1485789600 * 1000)
         })
       );
-      await component.ionViewDidEnter();
+      component.ionViewDidEnter();
+      tick();
       expect(loading.dismiss).toHaveBeenCalledTimes(1);
-    });
+    }));
   });
 
   describe('toggling the scale', () => {
