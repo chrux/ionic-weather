@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import {
   HttpClientTestingModule,
   HttpTestingController
@@ -10,15 +10,25 @@ import { Weather } from '../../models/weather';
 import { Forecast } from '../../models/forecast';
 import { UVIndex } from '../../models/uv-index';
 
+import { createLocationServiceMock } from '../location/location.service.mock';
+import { LocationService } from '../location/location.service';
+
 describe('WeatherService', () => {
   let httpTestingController: HttpTestingController;
   let service: WeatherService
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule]
+      imports: [HttpClientTestingModule],
+      providers: [
+        { provide: LocationService, useFactory: createLocationServiceMock }
+      ]
     });
     httpTestingController = TestBed.get(HttpTestingController);
     service = TestBed.get(WeatherService);
+    const loc = TestBed.get(LocationService);
+    loc.current.and.returnValue(
+      Promise.resolve({ latitude: 42.731338, longitude: -88.314159 })
+    );
   });
 
   it('should be created', () => {
@@ -26,22 +36,30 @@ describe('WeatherService', () => {
   });
 
   describe('current', () => {
-    it('gets current data from the server', () => {
+    it('gets the current location', () => {
+      const loc = TestBed.get(LocationService);
       service.current().subscribe();
+      expect(loc.current).toHaveBeenCalledTimes(1);
+    });
+
+    it('gets current data from the server', fakeAsync(() => {
+      service.current().subscribe();
+      tick();
       const req = httpTestingController.expectOne(
-        `${environment.baseUrl}/weather?lat=43.073051&lon=-89.40123&appid=${
+        `${environment.baseUrl}/weather?lat=42.731338&lon=-88.314159&appid=${
           environment.appId
         }`
       );
       expect(req.request.method).toEqual('GET');
       httpTestingController.verify();
-    });
+    }));
 
-    it('transforms the data', () => {
+    it('transforms the data', fakeAsync(() => {
       let weather: Weather;
       service.current().subscribe(w => (weather = w));
+      tick();
       const req = httpTestingController.expectOne(
-        `${environment.baseUrl}/weather?lat=43.073051&lon=-89.40123&appid=${
+        `${environment.baseUrl}/weather?lat=42.731338&lon=-88.314159&appid=${
           environment.appId
         }`
       );
@@ -65,26 +83,28 @@ describe('WeatherService', () => {
         condition: 300,
         date: new Date(1485789600 * 1000)
       });
-    });
+    }));
   });
 
   describe('forecast', () => {
-    it('gets current data from the server', () => {
+    it('gets current data from the server', fakeAsync(() => {
       service.forecast().subscribe();
+      tick();
       const req = httpTestingController.expectOne(
-        `${environment.baseUrl}/forecast?lat=43.073051&lon=-89.40123&appid=${
+        `${environment.baseUrl}/forecast?lat=42.731338&lon=-88.314159&appid=${
           environment.appId
         }`
       );
       expect(req.request.method).toEqual('GET');
       httpTestingController.verify();
-    });
+    }));
 
-    it('transforms the data', () => {
+    it('transforms the data', fakeAsync(() => {
       let forecast: Forecast;
       service.forecast().subscribe(f => (forecast = f));
+      tick();
       const req = httpTestingController.expectOne(
-        `${environment.baseUrl}/forecast?lat=43.073051&lon=-89.40123&appid=${
+        `${environment.baseUrl}/forecast?lat=42.731338&lon=-88.314159&appid=${
           environment.appId
         }`
       );
@@ -177,20 +197,21 @@ describe('WeatherService', () => {
         date: new Date(1485907200 * 1000)
       },
       ]]);
-    });
+    }));
   });
 
   describe('uv index', () => {
-    it('gets current data from the server', () => {
+    it('gets current data from the server', fakeAsync(() => {
       service.uvIndex().subscribe();
+      tick();
       const req = httpTestingController.expectOne(
-        `${environment.baseUrl}/uvi?lat=43.073051&lon=-89.40123&appid=${
+        `${environment.baseUrl}/uvi?lat=42.731338&lon=-88.314159&appid=${
           environment.appId
         }`
       );
       expect(req.request.method).toEqual('GET');
       httpTestingController.verify();
-    });
+    }));
 
     [
       { value: 0, riskLevel: 0 },
@@ -204,16 +225,17 @@ describe('WeatherService', () => {
       { value: 11, riskLevel: 4 },
       { value: 18, riskLevel: 4 }
     ].forEach(test =>
-      it(`transforms the data (value: ${test.value})`, () => {
+      it(`transforms the data (value: ${test.value})`, fakeAsync(() => {
         let uvIndex: UVIndex;
         service.uvIndex().subscribe(i => (uvIndex = i));
+        tick();
         const req = httpTestingController.expectOne(
-          `${environment.baseUrl}/uvi?lat=43.073051&lon=-89.40123&appid=${environment.appId}`
+          `${environment.baseUrl}/uvi?lat=42.731338&lon=-88.314159&appid=${environment.appId}`
         );
         req.flush({ value: test.value });
         expect(uvIndex).toEqual({ value: test.value, riskLevel: test.riskLevel });
         httpTestingController.verify();
       })
-    );
+    ));
   });
 });
