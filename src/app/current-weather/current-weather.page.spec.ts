@@ -5,10 +5,12 @@ import { CurrentWeatherPage } from './current-weather.page';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { WeatherService } from '../services/weather/weather.service';
 import { createWeatherServiceMock } from '../services/weather/weather.service.mock';
+import { UserPreferencesService } from '../services/user-preferences/user-preferences.service';
 
 import { of } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { createOverlayElementMock, createOverlayControllerMock } from 'test/mocks';
+import { createUserPreferencesServiceMock } from '../services/user-preferences/user-preferences.service.mock';
 
 describe('CurrentWeatherPage', () => {
   let component: CurrentWeatherPage;
@@ -26,7 +28,8 @@ describe('CurrentWeatherPage', () => {
           provide: LoadingController,
           useFactory: () =>
             createOverlayControllerMock('LoadingController', loading)
-        }
+        },
+        { provide: UserPreferencesService, useFactory: createUserPreferencesServiceMock }
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
     }).compileComponents();
@@ -81,6 +84,36 @@ describe('CurrentWeatherPage', () => {
       );
       await component.ionViewDidEnter();
       expect(loading.dismiss).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('toggling the scale', () => {
+    it('toggles from "C" to "F"', () => {
+      component.scale = 'C';
+      component.toggleScale();
+      expect(component.scale).toEqual('F');
+    });
+
+    it('sets the preference false when toggling from "C" to "F"', () => {
+      const userPreferences = TestBed.get(UserPreferencesService);
+      component.scale = 'C';
+      component.toggleScale();
+      expect(userPreferences.setUseCelcius).toHaveBeenCalledTimes(1);
+      expect(userPreferences.setUseCelcius).toHaveBeenCalledWith(false);
+    });
+
+    it('toggles from "F" to "C"', () => {
+      component.scale = 'F';
+      component.toggleScale();
+      expect(component.scale).toEqual('C');
+    });
+
+    it('sets the preference true when toggling from "F" to "C"', () => {
+      const userPreferences = TestBed.get(UserPreferencesService);
+      component.scale = 'F';
+      component.toggleScale();
+      expect(userPreferences.setUseCelcius).toHaveBeenCalledTimes(1);
+      expect(userPreferences.setUseCelcius).toHaveBeenCalledWith(true);
     });
   });
 });

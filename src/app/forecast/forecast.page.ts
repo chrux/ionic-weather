@@ -5,6 +5,7 @@ import { IconMapService } from '../services/icon-map/icon-map.service';
 import { WeatherService } from '../services/weather/weather.service';
 import { LoadingController } from '@ionic/angular';
 import { WeatherPageBase } from '../weather-page-base/weather-page-base';
+import { UserPreferencesService } from '../services/user-preferences/user-preferences.service';
 
 @Component({
   selector: 'app-forecast',
@@ -14,8 +15,9 @@ import { WeatherPageBase } from '../weather-page-base/weather-page-base';
 export class ForecastPage extends WeatherPageBase<Forecast> {
   constructor(
     public iconMap: IconMapService,
+    userPreferences: UserPreferencesService,
     loadingController: LoadingController,
     weather: WeatherService) {
-      super(loadingController, () => weather.forecast());
+      super(userPreferences, loadingController, () => weather.forecast());
     }
 }

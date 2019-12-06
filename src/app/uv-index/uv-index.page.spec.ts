@@ -5,10 +5,12 @@ import { UvIndexPage } from './uv-index.page';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { WeatherService } from '../services/weather/weather.service';
 import { createWeatherServiceMock } from '../services/weather/weather.service.mock';
+import { UserPreferencesService } from '../services/user-preferences/user-preferences.service';
 
 import { of } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { createOverlayElementMock, createOverlayControllerMock } from 'test/mocks';
+import { createUserPreferencesServiceMock } from '../services/user-preferences/user-preferences.service.mock';
 
 describe('UvIndexPage', () => {
   let component: UvIndexPage;
@@ -26,7 +28,8 @@ describe('UvIndexPage', () => {
           provide: LoadingController,
           useFactory: () =>
             createOverlayControllerMock('LoadingController', loading)
-        }
+        },
+        { provide: UserPreferencesService, useFactory: createUserPreferencesServiceMock }
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
     }).compileComponents();

@@ -4,6 +4,7 @@ import { UVIndex } from '../models/uv-index';
 import { WeatherService } from '../services/weather/weather.service';
 import { LoadingController } from '@ionic/angular';
 import { WeatherPageBase } from '../weather-page-base/weather-page-base';
+import { UserPreferencesService } from '../services/user-preferences/user-preferences.service';
 
 @Component({
   selector: 'app-uv-index',
@@ -29,9 +30,10 @@ export class UvIndexPage extends WeatherPageBase<UVIndex> {
   ];
 
   constructor(
+    userPreferences: UserPreferencesService,
     loadingController: LoadingController,
     weather: WeatherService
   ) {
-    super(loadingController, () => weather.uvIndex());
+    super(userPreferences, loadingController, () => weather.uvIndex());
   }
 }
