@@ -28,9 +28,12 @@ describe('LocationService', () => {
 
   describe('current', () => {
     it('calls the gelocation plugin', () => {
+      // Arrange
       const geolocation = TestBed.get(Geolocation);
       const service: LocationService = TestBed.get(LocationService);
+      // Act
       service.current();
+      // Assert
       expect(geolocation.getCurrentPosition).toHaveBeenCalledTimes(1);
     });
 

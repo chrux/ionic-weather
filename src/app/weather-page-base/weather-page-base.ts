@@ -2,6 +2,7 @@ import { LoadingController } from '@ionic/angular';
 import { Observable, Subject, from } from 'rxjs';
 import { UserPreferencesService } from '../services/user-preferences/user-preferences.service';
 import { flatMap, tap } from 'rxjs/operators';
+import { keys } from 'ts-transformer-keys';
 
 export class WeatherPageBase<T> {
   private refresh: Subject<void>;
